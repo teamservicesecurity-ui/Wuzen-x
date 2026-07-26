@@ -1,0 +1,38 @@
+node_modules/
+.env
+.env.*
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build outputs
+server/templates/base.apk
+android-client/build/
+android-client/.gradle/
+android-client/local.properties
+android-client/app/build/
+android-client/app/release/
+*.apk
+*.aab
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Keystore
+server/keystore.jks
+*.jks
+*.keystore
+
+# Runtime
+server/config.enc
+server/templates/config.enc
