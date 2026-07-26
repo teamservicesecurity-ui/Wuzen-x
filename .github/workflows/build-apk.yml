@@ -1,0 +1,85 @@
+name: Build Base APK
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'android-client/**'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build and Sign APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: 8.13
+
+      - name: Generate keystore if not exists
+        run: |
+          if [ ! -f server/keystore.jks ]; then
+            keytool -genkey -v -keystore server/keystore.jks \
+              -alias wuzenx -keyalg RSA -keysize 2048 \
+              -validity 10000 -storepass wuzenx123 -keypass wuzenx123 \
+              -dname "CN=WuzenX, OU=Dev, O=Wuzen, L=City, S=State, C=US"
+          fi
+
+      - name: Make gradlew executable
+        run: chmod +x android-client/gradlew
+
+      - name: Build unsigned APK
+        run: ./gradlew assembleRelease
+        working-directory: android-client
+
+      - name: Create config placeholder
+        run: |
+          echo '{"serverUrl":"wss://localhost:10000/ws","deviceId":"base","buildTime":0,"version":"1.0.0"}' | base64 > /tmp/config.enc
+
+      - name: Inject config and create template
+        run: |
+          cp android-client/app/build/outputs/apk/release/app-release-unsigned.apk server/templates/base.apk
+          zip -f server/templates/base.apk /tmp/config.enc 2>/dev/null || true
+
+      - name: Upload template artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: base-apk-template
+          path: server/templates/base.apk
+          retention-days: 90
+
+      - name: Sign APK
+        run: |
+          ANDROID_HOME=/usr/local/lib/android/sdk
+          BUILD_TOOLS=$ANDROID_HOME/build-tools/35.0.0
+          if [ -f "$BUILD_TOOLS/zipalign" ]; then
+            $BUILD_TOOLS/zipalign -p -f 4 android-client/app/build/outputs/apk/release/app-release-unsigned.apk /tmp/aligned.apk
+            $BUILD_TOOLS/apksigner sign --ks server/keystore.jks \
+              --ks-pass pass:wuzenx123 --ks-key-alias wuzenx \
+              --out WuzenX-base.apk /tmp/aligned.apk
+          else
+            cp android-client/app/build/outputs/apk/release/app-release-unsigned.apk WuzenX-base.apk
+          fi
+
+      - name: Upload signed APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: WuzenX-signed
+          path: WuzenX-base.apk
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          files: WuzenX-base.apk
+          generate_release_notes: true
