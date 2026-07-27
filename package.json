@@ -1,9 +1,27 @@
-// ... existing content ...
+{
+  "name": "wuzenx-server",
+  "version": "2.0.0",
+  "description": "Wuzen X v2.0 - C2 Server",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
+  },
   "dependencies": {
     "express": "^4.21.0",
     "ws": "^8.18.0",
-    "node-telegram-bot-api": "^0.66.0", // Keep this if you use it elsewhere
-    "telegraf": "^4.x.x", // <-- ADD THIS PACKAGE! (Use the version that matches your code)
+    "node-telegram-bot-api": "^0.66.0",
+    "telegraf": "^4.19.0", 
     "axios": "^1.7.9",
-// ... rest of dependencies
-    
+    "cors": "^2.8.5",
+    "jsonwebtoken": "^9.0.2",
+    "express-basic-auth": "^1.2.1",
+    "multer": "^1.4.5-lts.1",
+    "archiver": "^7.0.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "license": "MIT"
+}
