@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.wuzenx" // Update this to your real package name
+    namespace = "com.wuzenx"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.wuzenx"
+        applicationId = "com.wuzenx"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
@@ -26,7 +26,9 @@ android {
 }
 
 dependencies {
-    // Direct dependency declarations (works out of the box)
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
+    
+    // WebSocket library (this was missing)
+    implementation("org.java-websocket:Java-WebSocket:1.6.0")
 }
