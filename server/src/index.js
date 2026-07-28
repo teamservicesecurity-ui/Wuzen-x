@@ -3,7 +3,7 @@ import http from 'http';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import config from './config.js';
+import { config } from './config.js';          // ← fixed (named import)
 import { setupWebSocket } from './ws.js';
 import { setupBot } from './bot.js';
 import { setupDashboard } from './dashboard.js';
@@ -40,7 +40,7 @@ setupDashboard(app);
 console.log('[WuzenX] Dashboard initialized');
 
 // Start server
-const PORT = config.PORT || 10000;
+const PORT = config.port || 10000;             // ← fixed (lowercase)
 server.listen(PORT, '0.0.0.0', () => {
     console.log(`[WuzenX] Server running on port ${PORT}`);
     console.log(`[WuzenX] Dashboard: http://localhost:${PORT}`);
