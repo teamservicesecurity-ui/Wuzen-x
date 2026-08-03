@@ -1,20 +1,19 @@
-import crypto from 'crypto';
-
-export const config = {
-  port: parseInt(process.env.PORT || '10000'),
+const config = {
   botToken: process.env.BOT_TOKEN || '',
+  adminIds: (process.env.ADMIN_IDS || '').split(',').filter(Boolean).map(Number),
   channelId: process.env.CHANNEL_ID || '',
-  adminIds: (() => {
-    try { return JSON.parse(process.env.ADMIN_IDS || '[]'); } 
-    catch { return []; }
-  })(),
-  encryptionKey: process.env.ENCRYPTION_KEY || 
-    crypto.createHash('sha256').update('WUZ3N-X-MASTER-K3Y-2026').digest('hex').slice(0, 64),
-  sessionSecret: process.env.SESSION_SECRET || 'wuzen-x-session',
-  jwtSecret: process.env.JWT_SECRET || crypto.randomBytes(32).toString('hex'),
+  renderUrl: process.env.RENDER_URL || 'http://localhost:3000',
   dashboardUser: process.env.DASHBOARD_USER || 'admin',
-  dashboardPass: process.env.DASHBOARD_PASS || 'admin123',
-  keystorePass: process.env.KEYSTORE_PASSWORD || 'wuzenx2026',
-  keyAlias: process.env.KEY_ALIAS || 'wuzenx',
-  renderUrl: process.env.RENDER_EXTERNAL_URL || `http://localhost:${process.env.PORT || 10000}`,
+  dashboardPass: process.env.DASHBOARD_PASS || 'wuzen',
+
+  // APK builder
+  BASE_APK_URL: process.env.BASE_APK_URL || '',
+  SERVER_URL: process.env.SERVER_URL || '',
+  ENCRYPTION_KEY: process.env.ENCRYPTION_KEY || 'WuzenX2026DefaultKey!@#$%^&*()',
+  KEYSTORE_BASE64: process.env.KEYSTORE_BASE64 || '',
+  KEYSTORE_PASS: process.env.KEYSTORE_PASS || 'WuzenX2026!',
+  KEY_ALIAS: process.env.KEY_ALIAS || 'wuzenx'
 };
+
+export default config;   // ← apk-builder.js uses this
+export { config };       // ← bot.js uses this
