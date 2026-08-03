@@ -2,9 +2,13 @@ import crypto from 'crypto';
 import { config } from './config.js';
 
 const ALGO = 'aes-256-gcm';
-const KEY = Buffer.from(config.encryptionKey, 'hex');
-// ✅ SAFE FALLBACK
-const key = Buffer.from(process.env.MY_SECRET_KEY || '', 'base64');
+// ✅ 32-byte key derived from the passphrase — always valid for aes-256-gcm,
+//    works with ANY string (hex, base64, or plain passphrase)
+const KEY = crypto
+  .createHash('sha256')
+  .update(config.encryptionKey || 'WuzenX2026DefaultKey!@#$%^&*()')
+  .digest();
+
 export function encrypt(plaintext) {
   const iv = crypto.randomBytes(12);
   const cipher = crypto.createCipheriv(ALGO, KEY, iv);
@@ -24,7 +28,7 @@ export function decrypt(packet) {
     decipher.setAuthTag(Buffer.from(p.tag, 'hex'));
     let dec = decipher.update(p.data, 'hex', 'utf8');
     dec += decipher.final('utf8');
-    return JSON.parse(dec);
+    try { return JSON.parse(dec); } catch { return dec; } // JSON or raw string
   } catch { return null; }
 }
 
@@ -36,6 +40,6 @@ export function generateId(length = 8) {
   return crypto.randomBytes(length).toString('hex');
 }
 
-export function sanitize(text) {
-  return text.replace(/[_*[\]()~`>#+\-=|{}.!]/g, '\\$&');
+export function sanitize(text = '') {
+  return String(text).replace(/[\\_*[\]()~`>#+\-=|{}.!]/g, '\\$&');
 }
