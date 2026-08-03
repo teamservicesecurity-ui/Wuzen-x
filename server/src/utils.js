@@ -3,7 +3,8 @@ import { config } from './config.js';
 
 const ALGO = 'aes-256-gcm';
 const KEY = Buffer.from(config.encryptionKey, 'hex');
-
+// ✅ SAFE FALLBACK
+const key = Buffer.from(process.env.MY_SECRET_KEY || '', 'base64');
 export function encrypt(plaintext) {
   const iv = crypto.randomBytes(12);
   const cipher = crypto.createCipheriv(ALGO, KEY, iv);
