@@ -1,0 +1,111 @@
+name: Build Base APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: "Build type"
+        required: true
+        default: "debug"
+        type: choice
+        options:
+          - debug
+          - release
+      commit_to_repo:
+        description: "Commit generated APK to repository"
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: write
+
+env:
+  BUILD_TYPE: ${{ github.event.inputs.build_type || 'debug' }}
+  COMMIT_TO_REPO: ${{ github.event.inputs.commit_to_repo || 'false' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Decode Keystore
+        if: ${{ env.BUILD_TYPE == 'release' }}
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > fason/app/release.keystore
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x fason/gradlew
+
+      - name: Build APK
+        run: |
+          cd fason
+          if [ "${{ env.BUILD_TYPE }}" = "release" ]; then
+            ./gradlew assembleRelease --no-daemon
+          else
+            ./gradlew assembleDebug --no-daemon
+          fi
+        env:
+          KEYSTORE_FILE: release.keystore
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+
+      - name: Verify APK
+        run: |
+          if [ "${{ env.BUILD_TYPE }}" = "release" ]; then
+            APK_PATH="fason/app/build/outputs/apk/release/app-release.apk"
+          else
+            APK_PATH="fason/app/build/outputs/apk/debug/app-debug.apk"
+          fi
+
+          if [ ! -f "$APK_PATH" ]; then
+            echo "APK build failed."
+            exit 1
+          fi
+
+          echo "APK built successfully."
+          APK_SIZE=$(du -h "$APK_PATH" | cut -f1)
+          echo "APK_SIZE=$APK_SIZE" >> $GITHUB_ENV
+          echo "APK_PATH=$APK_PATH" >> $GITHUB_ENV
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Fason-${{ env.BUILD_TYPE }}-apk
+          path: ${{ env.APK_PATH }}
+          retention-days: 30
+
+      - name: Commit APK to repository
+        if: ${{ env.COMMIT_TO_REPO == 'true' }}
+        run: |
+          TARGET_DIR="backend/app/factory/baseApp"
+          TARGET_PATH="$TARGET_DIR/Fason.apk"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          mkdir -p "$TARGET_DIR"
+          cp "$APK_PATH" "$TARGET_PATH"
+
+          if git diff --quiet "$TARGET_PATH"; then
+            echo "No changes detected. Skipping commit."
+          else
+            git add "$TARGET_PATH"
+            git commit -m "chore: update Fason.apk (${{ env.BUILD_TYPE }}) [skip ci]"
+            git push origin HEAD:${{ github.ref }}
+          fi
