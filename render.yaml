@@ -2,7 +2,6 @@ services:
   - type: web
     name: wuzen-x
     runtime: docker
-    rootDir: server/src
     dockerfilePath: server/src/Dockerfile
     plan: free
     envVars:
