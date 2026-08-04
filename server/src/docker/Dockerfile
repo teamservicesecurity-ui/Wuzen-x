@@ -20,12 +20,12 @@ RUN mkdir -p ${ANDROID_HOME}/build-tools/34.0.0 \
 
 WORKDIR /opt/render/project/src
 
-# 4. Install Node dependencies (uses npm install to prevent missing lockfile crashes)
-COPY package*.json ./
+# 4. Copy package files from the server directory and install without lockfile enforcement
+COPY server/package*.json ./
 RUN npm install
 
-# 5. Copy project source files
-COPY . .
+# 5. Copy server source code
+COPY server/ ./
 
 EXPOSE 3000
 CMD ["npm", "start"]
