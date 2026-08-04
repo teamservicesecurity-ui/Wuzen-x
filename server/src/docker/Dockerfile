@@ -20,12 +20,17 @@ RUN mkdir -p ${ANDROID_HOME}/build-tools/34.0.0 \
 
 WORKDIR /opt/render/project/src
 
-# 4. Copy package files from the server directory and install without lockfile enforcement
-COPY server/package*.json ./
-RUN npm install
+# 4. Copy everything into the workdir first
+COPY . .
 
-# 5. Copy server source code
-COPY server/ ./
+# 5. Handle package.json whether it sits in root or a server subfolder
+RUN if [ -f "./package.json" ]; then \
+        npm install; \
+    elif [ -f "./server/package.json" ]; then \
+        cp ./server/package*.json ./ && npm install; \
+    else \
+        echo "Error: package.json not found" && exit 1; \
+    fi
 
 EXPOSE 3000
 CMD ["npm", "start"]
